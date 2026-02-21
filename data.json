@@ -194,58 +194,58 @@
     "chultas": [
       {
         "name": {
-          "mr": "श्री. गौतम गायकवाड",
-          "en": "Gautam Gaikwad"
+          "mr": "श्री गौतम गायकवाड",
+          "en": "Shree Gautam Gaikwad"
         },
         "occupation": {
-          "mr": "",
-          "en": ""
+          "mr": "शेती",
+          "en": "Farming"
         },
         "location": {
-          "mr": "",
-          "en": ""
+          "mr": "बुकी",
+          "en": "Buki"
         }
       },
       {
         "name": {
-          "mr": "श्री.उत्तम गायकवाड",
-          "en": "Uttam Gaikwad"
+          "mr": "श्री उत्तम गायकवाड",
+          "en": "Shree Uttam Gaikwad"
         },
         "occupation": {
-          "mr": "",
-          "en": ""
+          "mr": "शेती",
+          "en": "Farming"
         },
         "location": {
-          "mr": "",
-          "en": ""
+          "mr": "बुकी",
+          "en": "Buki"
         }
       },
       {
         "name": {
-          "mr": "श्री.विष्णु गायकवाड",
-          "en": "Vishnu Gaikwad"
+          "mr": "श्री विष्णू गायकवाड",
+          "en": "Shree Vishnu Gaikwad"
         },
         "occupation": {
-          "mr": "",
-          "en": ""
+          "mr": "शेती",
+          "en": "Farming"
         },
         "location": {
-          "mr": "",
-          "en": ""
+          "mr": "बुकी",
+          "en": "Buki"
         }
       },
       {
         "name": {
-          "mr": "श्री.बाळासाहेब गायकवाड",
-          "en": "Balasaheb Gaikwad"
+          "mr": "श्री बाळासाहेब गायकवाड",
+          "en": "Shree Balasaheb Gaikwad"
         },
         "occupation": {
-          "mr": "",
-          "en": ""
+          "mr": "शेती",
+          "en": "Farming"
         },
         "location": {
-          "mr": "",
-          "en": ""
+          "mr": "बुकी",
+          "en": "Buki"
         }
       }
     ]
