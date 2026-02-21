@@ -8,8 +8,8 @@
 // ⚙️  GITHUB CONFIG
 //     👇 CHANGE THESE TWO VALUES to your GitHub username & repo name
 // ============================================
-const PUBLIC_GITHUB_OWNER  = 'YOUR_GITHUB_USERNAME';   // e.g. 'rahuldeshpande'
-const PUBLIC_GITHUB_REPO   = 'YOUR_REPO_NAME';         // e.g. 'my-biodata'
+const PUBLIC_GITHUB_OWNER  = 'saurabhgaikwad31882-sketch';
+const PUBLIC_GITHUB_REPO   = 'Saurabh-biodata-0';
 const PUBLIC_GITHUB_BRANCH = 'main';
 
 const GITHUB_CONFIG_KEY = 'parichay_github_config';
