@@ -5,14 +5,24 @@
    ============================================= */
 
 // ============================================
-// ⚙️  GITHUB CONFIG — Fill these in Admin Panel
-//     (stored in localStorage on admin's device)
+// ⚙️  GITHUB CONFIG
+//     👇 CHANGE THESE TWO VALUES to your GitHub username & repo name
 // ============================================
+const PUBLIC_GITHUB_OWNER  = 'YOUR_GITHUB_USERNAME';   // e.g. 'rahuldeshpande'
+const PUBLIC_GITHUB_REPO   = 'YOUR_REPO_NAME';         // e.g. 'my-biodata'
+const PUBLIC_GITHUB_BRANCH = 'main';
+
 const GITHUB_CONFIG_KEY = 'parichay_github_config';
 
 function getGithubConfig() {
-  try { return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {}; }
-  catch(e) { return {}; }
+  const stored = (() => { try { return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {}; } catch(e) { return {}; } })();
+  // Always use hardcoded owner/repo so ALL devices can read data; only token comes from localStorage (admin only)
+  return {
+    owner:  PUBLIC_GITHUB_OWNER,
+    repo:   PUBLIC_GITHUB_REPO,
+    branch: PUBLIC_GITHUB_BRANCH,
+    token:  stored.token || ''
+  };
 }
 function saveGithubConfig(cfg) {
   localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(cfg));
@@ -20,7 +30,7 @@ function saveGithubConfig(cfg) {
 
 // ---- PASSWORDS ----
 const PUBLIC_PWD = '3192';
-const ADMIN_PWD  = 'Saurabh1999@admin';
+const ADMIN_PWD  = 'ganesh@admin';
 
 // ---- LOCAL CACHE KEY (for offline fallback) ----
 const CACHE_KEY = 'parichay_data_cache';
@@ -128,9 +138,8 @@ async function fetchDataFromGitHub() {
   const cfg = getGithubConfig();
   if (!cfg.owner || !cfg.repo) return null;
   try {
-    // Use GitHub API (not raw) to always get the latest version, bypassing CDN cache
-    const branch = cfg.branch || 'main';
-    const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json?ref=${branch}&t=${Date.now()}`;
+    // Use GitHub API instead of raw URL — bypasses CDN cache so ALL devices always get latest data
+    const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json?ref=${cfg.branch||'main'}&t=${Date.now()}`;
     const headers = { 'Accept': 'application/vnd.github.v3+json' };
     if (cfg.token) headers['Authorization'] = `token ${cfg.token}`;
     const res = await fetch(apiUrl, { headers });
