@@ -20,7 +20,7 @@ function saveGithubConfig(cfg) {
 
 // ---- PASSWORDS ----
 const PUBLIC_PWD = '3192';
-const ADMIN_PWD  = 'ganesh@admin';
+const ADMIN_PWD  = 'Saurabh1999@admin';
 
 // ---- LOCAL CACHE KEY (for offline fallback) ----
 const CACHE_KEY = 'parichay_data_cache';
@@ -128,10 +128,17 @@ async function fetchDataFromGitHub() {
   const cfg = getGithubConfig();
   if (!cfg.owner || !cfg.repo) return null;
   try {
-    const url = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch||'main'}/data.json?t=${Date.now()}`;
-    const res = await fetch(url);
+    // Use GitHub API (not raw) to always get the latest version, bypassing CDN cache
+    const branch = cfg.branch || 'main';
+    const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json?ref=${branch}&t=${Date.now()}`;
+    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+    if (cfg.token) headers['Authorization'] = `token ${cfg.token}`;
+    const res = await fetch(apiUrl, { headers });
     if (!res.ok) return null;
-    const data = await res.json();
+    const json = await res.json();
+    // GitHub API returns file content as base64
+    const decoded = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
+    const data = JSON.parse(decoded);
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     return data;
   } catch(e) { return null; }
