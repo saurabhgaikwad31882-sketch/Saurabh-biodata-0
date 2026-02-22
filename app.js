@@ -361,10 +361,15 @@ function renderGalleryPublic(d){
 }
 function renderContactsPublic(d){
   const e=document.getElementById('contact-cards');if(!e)return;
-  const cards=(d.contacts||[]).map(c=>`<div class="contact-card"><div class="cc-rel">${val(c.relation)||''}</div><div class="cc-name">${val(c.name)||''}</div><a class="cc-phone" href="tel:${c.phone}">${IC.phone}<span>${c.phone}</span></a></div>`).join('');
+  e.innerHTML=(d.contacts||[]).map(c=>`<div class="contact-card"><div class="cc-rel">${val(c.relation)||''}</div><div class="cc-name">${val(c.name)||''}</div><a class="cc-phone" href="tel:${c.phone}">${IC.phone}<span>${c.phone}</span></a></div>`).join('');
+  // Render address separately
+  const addrBox=document.getElementById('contact-address');
+  const addrTxt=document.getElementById('contact-address-text');
   const addrText=val(d.address);
-  const addrBlock=addrText?`<div class="contact-address">${IC.mapPin}<span>${addrText}</span></div>`:'';
-  e.innerHTML=cards+addrBlock;
+  if(addrBox && addrTxt){
+    if(addrText){ addrTxt.textContent=addrText; addrBox.style.display='flex'; }
+    else { addrBox.style.display='none'; }
+  }
 }
 
 window.toggleLang=function(){currentLang=currentLang==='mr'?'en':'mr';renderPublicPage();};
