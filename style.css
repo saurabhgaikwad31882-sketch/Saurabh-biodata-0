@@ -331,3 +331,24 @@ body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--text-dark
   .admin-header{flex-direction:column;gap:8px;}
   .gate-box{padding:36px 22px;}
 }
+
+/* ---- Contact Address ---- */
+.contact-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--cream, #fffbf0);
+  border: 1px solid rgba(200,144,42,0.25);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  font-size: 0.95rem;
+  color: var(--text-main, #2d1a00);
+  line-height: 1.5;
+}
+.contact-address svg {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  stroke: #c8902a;
+  margin-top: 2px;
+}

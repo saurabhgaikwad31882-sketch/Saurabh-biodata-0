@@ -361,7 +361,10 @@ function renderGalleryPublic(d){
 }
 function renderContactsPublic(d){
   const e=document.getElementById('contact-cards');if(!e)return;
-  e.innerHTML=(d.contacts||[]).map(c=>`<div class="contact-card"><div class="cc-rel">${val(c.relation)||''}</div><div class="cc-name">${val(c.name)||''}</div><a class="cc-phone" href="tel:${c.phone}">${IC.phone}<span>${c.phone}</span></a></div>`).join('');
+  const cards=(d.contacts||[]).map(c=>`<div class="contact-card"><div class="cc-rel">${val(c.relation)||''}</div><div class="cc-name">${val(c.name)||''}</div><a class="cc-phone" href="tel:${c.phone}">${IC.phone}<span>${c.phone}</span></a></div>`).join('');
+  const addrText=val(d.address);
+  const addrBlock=addrText?`<div class="contact-address">${IC.mapPin}<span>${addrText}</span></div>`:'';
+  e.innerHTML=cards+addrBlock;
 }
 
 window.toggleLang=function(){currentLang=currentLang==='mr'?'en':'mr';renderPublicPage();};
