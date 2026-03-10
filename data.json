@@ -82,8 +82,8 @@
   "family": {
     "father": {
       "name": {
-        "mr": "श्री. विनायक रामचंद्र देशपांडे",
-        "en": "Shri. Vinayak Ramchandra Deshpande"
+        "mr": "श्री. महादेव श्रीरंग गायकवाड",
+        "en": "Shri. Mahadev Shrirang Gaikwad"
       },
       "occupation": {
         "mr": "शेती व्यवसाय",
@@ -92,30 +92,15 @@
     },
     "mother": {
       "name": {
-        "mr": "सौ. सुनीता विनायक देशपांडे",
-        "en": "Sau. Sunita Vinayak Deshpande"
+        "mr": "सौ. वंदना महादेव गायकवाड",
+        "en": "Sau. Vandana Mahadev Gaikwad"
       },
       "occupation": {
         "mr": "गृहिणी",
         "en": "Homemaker"
       }
     },
-    "sisters": [
-      {
-        "name": {
-          "mr": "कु. प्रिया देशपांडे",
-          "en": "Ku. Priya Deshpande"
-        },
-        "occupation": {
-          "mr": "शिक्षिका",
-          "en": "Teacher"
-        },
-        "married": {
-          "mr": "अविवाहित",
-          "en": "Unmarried"
-        }
-      }
-    ],
+    "sisters": [],
     "brothers": [],
     "mamas": [
       {
