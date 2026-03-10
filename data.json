@@ -100,26 +100,141 @@
         "en": "Homemaker"
       }
     },
-    "sisters": [],
+    "sisters": [
+      {
+        "name": {
+          "mr": "सौ. अश्विनी रामचंद्र भोसले",
+          "en": "Sau. Ashwini Ramachandra Bhosale"
+        },
+        "occupation": {
+          "mr": "",
+          "en": ""
+        },
+        "married": {
+          "mr": "विवाहित",
+          "en": "Married"
+        }
+      },
+      {
+        "name": {
+          "mr": "सौ. रोहिणी सौरभ पोळ",
+          "en": "Sau. Rohoni Saurabh Pol"
+        },
+        "occupation": {
+          "mr": "",
+          "en": ""
+        },
+        "married": {
+          "mr": "विवाहित",
+          "en": "Married"
+        }
+      }
+    ],
     "brothers": [],
     "mamas": [
       {
         "name": {
-          "mr": "श्री. सुभाष जोशी",
-          "en": "Shri. Subhash Joshi"
+          "mr": "श्री. रामेश्वर दिगंबर रोडगे",
+          "en": "Shree Rameshwar Digambar Rodage"
         },
         "relation": {
           "mr": "मामा",
-          "en": "Maternal Uncle"
+          "en": "Mama"
         },
         "location": {
-          "mr": "पुणे",
-          "en": "Pune"
+          "mr": "बावची",
+          "en": "Bawachi"
+        }
+      },
+      {
+        "name": {
+          "mr": "श्री. सिद्धेश्वर दिगंबर रोडगे",
+          "en": "Shree Siddheshwar Digambar Rodage"
+        },
+        "relation": {
+          "mr": "मामा",
+          "en": "Mama"
+        },
+        "location": {
+          "mr": "बावची",
+          "en": "Bawachi"
         }
       }
     ],
-    "mushis": [],
-    "chultas": []
+    "mushis": [
+      {
+        "name": {
+          "mr": "सौ चंद्रकला उत्तम गायकवाड",
+          "en": "Sau Chandrakala Uttam Gaikwad"
+        },
+        "relation": {
+          "mr": "मावशी",
+          "en": "Maternal Aunt"
+        },
+        "location": {
+          "mr": "बुकी",
+          "en": "बुकी"
+        }
+      },
+      {
+        "name": {
+          "mr": "सौ नंदा तुकाराम अंधारे",
+          "en": "Sau Nanda Tukaram Andhare"
+        },
+        "relation": {
+          "mr": "मावशी",
+          "en": "मीaternal Aunt"
+        },
+        "location": {
+          "mr": "भांडगाव",
+          "en": "Bhandgaon"
+        }
+      }
+    ],
+    "chultas": [
+      {
+        "name": {
+          "mr": "श्री गौतम गायकवाड",
+          "en": "Shree Gautam Gaikwad"
+        },
+        "occupation": {
+          "mr": "Farmer",
+          "en": "शेती"
+        },
+        "location": {
+          "mr": "बुकी",
+          "en": "Buki"
+        }
+      },
+      {
+        "name": {
+          "mr": "श्री उत्तम गायकवाड",
+          "en": "Shree Uttam Gaikwad"
+        },
+        "occupation": {
+          "mr": "Farming",
+          "en": "शेती"
+        },
+        "location": {
+          "mr": "बुकी",
+          "en": "Buki"
+        }
+      },
+      {
+        "name": {
+          "mr": "श्री विष्णू गायकवाड",
+          "en": "Shree Vishnu Gaikwad"
+        },
+        "occupation": {
+          "mr": "Farming",
+          "en": "शेती"
+        },
+        "location": {
+          "mr": "बुकी",
+          "en": "Buki"
+        }
+      }
+    ]
   },
   "gallery": [],
   "contacts": [
