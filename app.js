@@ -514,10 +514,11 @@ window.addFamilyMember=function(listId,fields){
 function getImageUrl(filename) {
   const cfg = getGithubConfig();
   if (!cfg.owner || !cfg.repo) return filename;
-  // If already a full URL, return as-is (legacy base64 or external)
-  if (filename.startsWith('data:') || filename.startsWith('http')) return filename;
-  const branch = cfg.branch || 'main';
-  return `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${branch}/photos/${filename}?t=${Date.now()}`;
+  // Legacy base64 or external URL — return as-is
+  if (!filename || filename.startsWith('data:') || filename.startsWith('http')) return filename;
+  // Use GitHub Pages URL — faster, no CDN delay, cached properly
+  // Format: https://username.github.io/repo/photos/filename.jpg
+  return `https://${cfg.owner}.github.io/${cfg.repo}/photos/${filename}`;
 }
 
 function renderAdminGallery(){
