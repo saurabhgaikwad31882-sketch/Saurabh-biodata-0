@@ -597,7 +597,23 @@ window.handleGalleryUpload=async function(input){
   const files = Array.from(input.files);
   if(!files.length) return;
 
-  toast(`⏳ ${files.length} फोटो upload होत आहे...`, 8000);
+  // First verify token works
+  toast('⏳ Token verify करत आहे...', 5000);
+  try {
+    const testR = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}`, {
+      headers: { 'Authorization': `token ${cfg.token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if(!testR.ok) {
+      const e = await testR.json();
+      toast(`❌ Repo Error: ${e.message} — Check username/repo/token in GitHub Settings`);
+      input.value=''; return;
+    }
+  } catch(e) {
+    toast('❌ Network error. Check internet connection.');
+    input.value=''; return;
+  }
+
+  toast(`⏳ ${files.length} फोटो upload होत आहे...`, 15000);
 
   const headers = {
     'Authorization': `token ${cfg.token}`,
@@ -605,66 +621,82 @@ window.handleGalleryUpload=async function(input){
     'Accept': 'application/vnd.github.v3+json'
   };
   const branch = cfg.branch || 'main';
-
   let uploaded = 0;
+
   for (const file of files) {
     try {
-      // Read file as base64
-      const base64 = await new Promise((res,rej)=>{
-        const r = new FileReader();
-        r.onload = ev => res(ev.target.result.split(',')[1]);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-      });
+      toast(`⏳ Uploading: ${file.name} (${Math.round(file.size/1024)}KB)...`, 15000);
 
-      // Unique filename: timestamp + original name
-      const ext = file.name.split('.').pop().toLowerCase();
-      const filename = `photo_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+      // Compress image if too large (> 500KB)
+      let base64;
+      if (file.size > 500*1024) {
+        base64 = await compressAndEncode(file, 0.7);
+      } else {
+        base64 = await new Promise((res,rej)=>{
+          const r = new FileReader();
+          r.onload = ev => res(ev.target.result.split(',')[1]);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+      }
+
+      const ext = file.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+      const filename = `photo_${Date.now()}.${ext}`;
       const path = `photos/${filename}`;
       const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
 
-      // Check if file already exists (get SHA)
-      let sha = '';
-      try {
-        const check = await fetch(apiUrl, { headers });
-        if (check.ok) { const j = await check.json(); sha = j.sha; }
-      } catch(e) {}
-
-      const body = {
+      const body = JSON.stringify({
         message: `Add photo ${filename}`,
         content: base64,
-        branch,
-        ...(sha ? { sha } : {})
-      };
+        branch
+      });
 
-      const r = await fetch(apiUrl, { method:'PUT', headers, body: JSON.stringify(body) });
+      const r = await fetch(apiUrl, { method:'PUT', headers, body });
       if (r.ok) {
         if(!appData.gallery) appData.gallery=[];
         appData.gallery.push(filename);
         uploaded++;
         renderAdminGallery();
-        // Show the exact URL being used
-        const cfg2 = getGithubConfig();
-        const previewUrl = `https://${cfg2.owner}.github.io/${cfg2.repo}/photos/${filename}`;
-        console.log('Photo uploaded to:', previewUrl);
+        toast(`✅ ${file.name} upload झाला! (${uploaded}/${files.length})`, 3000);
       } else {
         const err = await r.json();
-        toast(`❌ Upload failed: ${err.message||'Unknown error'}`);
-        console.error('Upload error:', err);
+        toast(`❌ Failed: ${err.message||'Unknown'}`, 5000);
       }
     } catch(e) {
-      toast('❌ Network error during upload');
+      toast(`❌ Error: ${e.message||'Upload failed'}`, 5000);
     }
   }
 
   if(uploaded > 0) {
-    toast(`✅ ${uploaded} फोटो upload झाले! आता Save करा.`);
-    // Auto-save data.json with new filenames
-    await saveDataToGitHub(appData);
-    toast(`✅ ${uploaded} फोटो live झाले!`);
+    toast('⏳ data.json save करत आहे...', 5000);
+    const saved = await saveDataToGitHub(appData);
+    if(saved) toast(`✅ ${uploaded} फोटो successfully live झाले! 🎉`, 4000);
+    else toast('⚠️ Photos uploaded but data.json save failed. Try Save button.', 5000);
   }
   input.value='';
 };
+
+// Compress image using canvas
+async function compressAndEncode(file, quality=0.7) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      // Max 1200px width
+      let w = img.width, h = img.height;
+      if(w > 1200) { h = Math.round(h * 1200/w); w = 1200; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      URL.revokeObjectURL(url);
+      resolve(dataUrl.split(',')[1]);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 // =============================================
 // TOAST
