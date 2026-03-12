@@ -5,31 +5,21 @@
    ============================================= */
 
 // ============================================
-// ⚙️  GITHUB CONFIG
-//     👇 CHANGE THESE TWO VALUES to your GitHub username & repo name
+// ⚙️  GITHUB CONFIG — Fill these in Admin Panel
+//     (stored in localStorage on admin's device)
 // ============================================
-const PUBLIC_GITHUB_OWNER  = 'saurabhgaikwad31882-sketch';
-const PUBLIC_GITHUB_REPO   = 'Saurabh-biodata-0';
-const PUBLIC_GITHUB_BRANCH = 'main';
-
 const GITHUB_CONFIG_KEY = 'parichay_github_config';
 
 function getGithubConfig() {
-  const stored = (() => { try { return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {}; } catch(e) { return {}; } })();
-  // Always use hardcoded owner/repo so ALL devices can read data; only token comes from localStorage (admin only)
-  return {
-    owner:  PUBLIC_GITHUB_OWNER,
-    repo:   PUBLIC_GITHUB_REPO,
-    branch: PUBLIC_GITHUB_BRANCH,
-    token:  stored.token || ''
-  };
+  try { return JSON.parse(localStorage.getItem(GITHUB_CONFIG_KEY)) || {}; }
+  catch(e) { return {}; }
 }
 function saveGithubConfig(cfg) {
   localStorage.setItem(GITHUB_CONFIG_KEY, JSON.stringify(cfg));
 }
 
 // ---- PASSWORDS ----
-const PUBLIC_PWD = '3192';
+const PUBLIC_PWD = 'parichay2024';
 const ADMIN_PWD  = 'ganesh@admin';
 
 // ---- LOCAL CACHE KEY (for offline fallback) ----
@@ -138,16 +128,10 @@ async function fetchDataFromGitHub() {
   const cfg = getGithubConfig();
   if (!cfg.owner || !cfg.repo) return null;
   try {
-    // Use GitHub API instead of raw URL — bypasses CDN cache so ALL devices always get latest data
-    const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/data.json?ref=${cfg.branch||'main'}&t=${Date.now()}`;
-    const headers = { 'Accept': 'application/vnd.github.v3+json' };
-    if (cfg.token) headers['Authorization'] = `token ${cfg.token}`;
-    const res = await fetch(apiUrl, { headers });
+    const url = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch||'main'}/data.json?t=${Date.now()}`;
+    const res = await fetch(url);
     if (!res.ok) return null;
-    const json = await res.json();
-    // GitHub API returns file content as base64
-    const decoded = decodeURIComponent(escape(atob(json.content.replace(/\n/g, ''))));
-    const data = JSON.parse(decoded);
+    const data = await res.json();
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     return data;
   } catch(e) { return null; }
@@ -357,23 +341,15 @@ function renderMemberCards(id,members){
 function renderGalleryPublic(d){
   const e=document.getElementById('gallery-grid');if(!e)return;
   if(!d.gallery||!d.gallery.length){e.innerHTML=`<div class="gallery-item"><div class="gallery-placeholder">${IC.image}<span>${LANG[currentLang].noPhotos}</span></div></div>`;return;}
-  e.innerHTML=d.gallery.map((src,i)=>`<div class="gallery-item" onclick="openLightbox(${i})"><img src="${src}" alt="Photo ${i+1}" loading="lazy"/><div class="gallery-overlay">${IC.search}</div></div>`).join('');
+  e.innerHTML=d.gallery.map((src,i)=>`<div class="gallery-item" onclick="openLightbox(${i})"><img src="${getImageUrl(src)}" alt="Photo ${i+1}" loading="lazy"/><div class="gallery-overlay">${IC.search}</div></div>`).join('');
 }
 function renderContactsPublic(d){
   const e=document.getElementById('contact-cards');if(!e)return;
   e.innerHTML=(d.contacts||[]).map(c=>`<div class="contact-card"><div class="cc-rel">${val(c.relation)||''}</div><div class="cc-name">${val(c.name)||''}</div><a class="cc-phone" href="tel:${c.phone}">${IC.phone}<span>${c.phone}</span></a></div>`).join('');
-  // Render address separately
-  const addrBox=document.getElementById('contact-address');
-  const addrTxt=document.getElementById('contact-address-text');
-  const addrText=val(d.address);
-  if(addrBox && addrTxt){
-    if(addrText){ addrTxt.textContent=addrText; addrBox.style.display='flex'; }
-    else { addrBox.style.display='none'; }
-  }
 }
 
 window.toggleLang=function(){currentLang=currentLang==='mr'?'en':'mr';renderPublicPage();};
-window.openLightbox=function(i){document.querySelector('#lightbox img').src=appData.gallery[i];document.getElementById('lightbox').classList.add('open');};
+window.openLightbox=function(i){document.querySelector('#lightbox img').src=getImageUrl(appData.gallery[i]);document.getElementById('lightbox').classList.add('open');};
 window.printPage=()=>window.print();
 window.sharePage=function(){
   if(navigator.share)navigator.share({title:val(appData.name)+' — परिचयपत्र',url:location.href});
@@ -535,17 +511,126 @@ window.addFamilyMember=function(listId,fields){
 // =============================================
 // ADMIN — GALLERY
 // =============================================
+function getImageUrl(filename) {
+  const cfg = getGithubConfig();
+  if (!cfg.owner || !cfg.repo) return filename;
+  // If already a full URL, return as-is (legacy base64 or external)
+  if (filename.startsWith('data:') || filename.startsWith('http')) return filename;
+  const branch = cfg.branch || 'main';
+  return `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${branch}/photos/${filename}?t=${Date.now()}`;
+}
+
 function renderAdminGallery(){
   const e=document.getElementById('admin-gallery-grid');if(!e)return;
-  e.innerHTML=(appData.gallery||[]).map((src,i)=>`<div class="admin-gallery-item"><img src="${src}" alt=""/><button class="ag-remove" onclick="removeGalleryPhoto(${i})">${IC.x}</button></div>`).join('');
+  if(!appData.gallery||!appData.gallery.length){e.innerHTML='<p style="color:var(--text-light);font-size:0.85rem">अजून फोटो नाही</p>';return;}
+  e.innerHTML=appData.gallery.map((src,i)=>`
+    <div class="admin-gallery-item">
+      <img src="${getImageUrl(src)}" alt="" onerror="this.style.opacity=0.3"/>
+      <button class="ag-remove" onclick="removeGalleryPhoto(${i})">${IC.x}</button>
+    </div>`).join('');
 }
-window.removeGalleryPhoto=function(i){appData.gallery.splice(i,1);renderAdminGallery();};
-window.handleGalleryUpload=function(input){
-  Array.from(input.files).forEach(file=>{
-    const r=new FileReader();
-    r.onload=ev=>{if(!appData.gallery)appData.gallery=[];appData.gallery.push(ev.target.result);renderAdminGallery();toast('फोटो जोडला! (Save to publish)');};
-    r.readAsDataURL(file);
-  });
+
+window.removeGalleryPhoto=async function(i){
+  const filename = appData.gallery[i];
+  // If it's a plain filename (stored in repo), delete from GitHub too
+  if (filename && !filename.startsWith('data:') && !filename.startsWith('http')) {
+    const cfg = getGithubConfig();
+    if (cfg.owner && cfg.repo && cfg.token) {
+      const path = `photos/${filename}`;
+      const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+      const headers = {
+        'Authorization': `token ${cfg.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      };
+      try {
+        const r = await fetch(apiUrl, { headers });
+        if (r.ok) {
+          const j = await r.json();
+          await fetch(apiUrl, {
+            method: 'DELETE',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: `Delete photo ${filename}`, sha: j.sha, branch: cfg.branch||'main' })
+          });
+        }
+      } catch(e) {}
+    }
+  }
+  appData.gallery.splice(i,1);
+  renderAdminGallery();
+  toast('फोटो काढला! Save करा...');
+};
+
+window.handleGalleryUpload=async function(input){
+  const cfg = getGithubConfig();
+  if(!cfg.owner||!cfg.repo||!cfg.token){
+    toast('❌ GitHub config missing! Set it in ⚙️ GitHub Settings tab.');
+    input.value=''; return;
+  }
+
+  const files = Array.from(input.files);
+  if(!files.length) return;
+
+  toast(`⏳ ${files.length} फोटो upload होत आहे...`, 8000);
+
+  const headers = {
+    'Authorization': `token ${cfg.token}`,
+    'Content-Type': 'application/json',
+    'Accept': 'application/vnd.github.v3+json'
+  };
+  const branch = cfg.branch || 'main';
+
+  let uploaded = 0;
+  for (const file of files) {
+    try {
+      // Read file as base64
+      const base64 = await new Promise((res,rej)=>{
+        const r = new FileReader();
+        r.onload = ev => res(ev.target.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+
+      // Unique filename: timestamp + original name
+      const ext = file.name.split('.').pop().toLowerCase();
+      const filename = `photo_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+      const path = `photos/${filename}`;
+      const apiUrl = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${path}`;
+
+      // Check if file already exists (get SHA)
+      let sha = '';
+      try {
+        const check = await fetch(apiUrl, { headers });
+        if (check.ok) { const j = await check.json(); sha = j.sha; }
+      } catch(e) {}
+
+      const body = {
+        message: `Add photo ${filename}`,
+        content: base64,
+        branch,
+        ...(sha ? { sha } : {})
+      };
+
+      const r = await fetch(apiUrl, { method:'PUT', headers, body: JSON.stringify(body) });
+      if (r.ok) {
+        if(!appData.gallery) appData.gallery=[];
+        appData.gallery.push(filename); // store only filename, not base64!
+        uploaded++;
+        renderAdminGallery();
+      } else {
+        const err = await r.json();
+        toast(`❌ Upload failed: ${err.message||'Unknown error'}`);
+      }
+    } catch(e) {
+      toast('❌ Network error during upload');
+    }
+  }
+
+  if(uploaded > 0) {
+    toast(`✅ ${uploaded} फोटो upload झाले! आता Save करा.`);
+    // Auto-save data.json with new filenames
+    await saveDataToGitHub(appData);
+    toast(`✅ ${uploaded} फोटो live झाले!`);
+  }
   input.value='';
 };
 
