@@ -341,7 +341,8 @@ function renderMemberCards(id,members){
 function renderGalleryPublic(d){
   const e=document.getElementById('gallery-grid');if(!e)return;
   if(!d.gallery||!d.gallery.length){e.innerHTML=`<div class="gallery-item"><div class="gallery-placeholder">${IC.image}<span>${LANG[currentLang].noPhotos}</span></div></div>`;return;}
-  e.innerHTML=d.gallery.map((src,i)=>`<div class="gallery-item" onclick="openLightbox(${i})"><img src="${getImageUrl(src)}" alt="Photo ${i+1}" loading="lazy"/><div class="gallery-overlay">${IC.search}</div></div>`).join('');
+  e.innerHTML=d.gallery.map((src,i)=>`<div class="gallery-item" onclick="openLightbox(${i})"><img id="gimg-${i}" alt="Photo ${i+1}" loading="lazy"/><div class="gallery-overlay">${IC.search}</div></div>`).join('');
+  d.gallery.forEach((src,i)=>{ const el=document.getElementById('gimg-'+i); if(el) loadImageWithFallback(el,src); });
 }
 function renderContactsPublic(d){
   const e=document.getElementById('contact-cards');if(!e)return;
@@ -349,7 +350,7 @@ function renderContactsPublic(d){
 }
 
 window.toggleLang=function(){currentLang=currentLang==='mr'?'en':'mr';renderPublicPage();};
-window.openLightbox=function(i){document.querySelector('#lightbox img').src=getImageUrl(appData.gallery[i]);document.getElementById('lightbox').classList.add('open');};
+window.openLightbox=function(i){const lb=document.querySelector('#lightbox img');loadImageWithFallback(lb,appData.gallery[i]);document.getElementById('lightbox').classList.add('open');};
 window.printPage=()=>window.print();
 window.sharePage=function(){
   if(navigator.share)navigator.share({title:val(appData.name)+' — परिचयपत्र',url:location.href});
@@ -516,21 +517,44 @@ function getImageUrl(filename) {
   if (!cfg.owner || !cfg.repo) return filename;
   if (!filename || filename.startsWith('data:') || filename.startsWith('http')) return filename;
   const branch = cfg.branch || 'main';
-  // Use jsDelivr CDN — fastest, no delay, works immediately after upload
-  return `https://cdn.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${branch}/photos/${filename}`;
+  return `https://${cfg.owner}.github.io/${cfg.repo}/photos/${filename}`;
+}
+
+// Smart image loader — tries GitHub Pages first, then raw, then jsdelivr
+function loadImageWithFallback(imgEl, filename) {
+  const cfg = getGithubConfig();
+  if (!cfg.owner || !cfg.repo) return;
+  if (!filename || filename.startsWith('data:') || filename.startsWith('http')) {
+    imgEl.src = filename; return;
+  }
+  const branch = cfg.branch || 'main';
+  const urls = [
+    // GitHub Pages — same domain as site, fastest
+    `https://${cfg.owner}.github.io/${cfg.repo}/photos/${filename}`,
+    // raw GitHub — direct from repo
+    `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${branch}/photos/${filename}`,
+    // jsDelivr CDN — cached globally
+    `https://cdn.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${branch}/photos/${filename}`,
+  ];
+  let idx = 0;
+  function tryNext() {
+    if (idx >= urls.length) {
+      imgEl.alt = '❌ Photo not found';
+      imgEl.style.padding = '10px';
+      imgEl.style.fontSize = '0.7rem';
+      return;
+    }
+    imgEl.onerror = () => { idx++; tryNext(); };
+    imgEl.src = urls[idx++];
+  }
+  tryNext();
 }
 
 function renderAdminGallery(){
   const e=document.getElementById('admin-gallery-grid');if(!e)return;
   if(!appData.gallery||!appData.gallery.length){e.innerHTML='<p style="color:var(--text-light);font-size:0.85rem">अजून फोटो नाही</p>';return;}
-  e.innerHTML=appData.gallery.map((src,i)=>{
-    const url = getImageUrl(src);
-    return `<div class="admin-gallery-item">
-      <img src="${url}" alt="" onerror="this.src='';this.style.background='#fee2e2';this.title='Failed: '+decodeURIComponent('${encodeURIComponent(url)}')"/>
-      <div style="font-size:0.65rem;color:#666;word-break:break-all;padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${url}">${url.split('/').pop()}</div>
-      <button class="ag-remove" onclick="removeGalleryPhoto(${i})">${IC.x}</button>
-    </div>`;
-  }).join('');
+  e.innerHTML=appData.gallery.map((src,i)=>`<div class="admin-gallery-item"><img id="aimg-${i}" alt=""/><div style="font-size:0.65rem;color:#666;padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${typeof src==='string'?src.split('/').pop().substring(0,20):''}</div><button class="ag-remove" onclick="removeGalleryPhoto(${i})">${IC.x}</button></div>`).join('');
+  appData.gallery.forEach((src,i)=>{ const el=document.getElementById('aimg-'+i); if(el) loadImageWithFallback(el,src); });
 }
 
 window.removeGalleryPhoto=async function(i){
@@ -616,12 +640,17 @@ window.handleGalleryUpload=async function(input){
       const r = await fetch(apiUrl, { method:'PUT', headers, body: JSON.stringify(body) });
       if (r.ok) {
         if(!appData.gallery) appData.gallery=[];
-        appData.gallery.push(filename); // store only filename, not base64!
+        appData.gallery.push(filename);
         uploaded++;
         renderAdminGallery();
+        // Show the exact URL being used
+        const cfg2 = getGithubConfig();
+        const previewUrl = `https://${cfg2.owner}.github.io/${cfg2.repo}/photos/${filename}`;
+        console.log('Photo uploaded to:', previewUrl);
       } else {
         const err = await r.json();
         toast(`❌ Upload failed: ${err.message||'Unknown error'}`);
+        console.error('Upload error:', err);
       }
     } catch(e) {
       toast('❌ Network error during upload');
