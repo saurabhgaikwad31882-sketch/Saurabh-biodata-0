@@ -233,6 +233,20 @@
           "mr": "बुकी",
           "en": "Buki"
         }
+      },
+      {
+        "name": {
+          "mr": "श्री बाळासाहेब गायकवाड",
+          "en": "Shree Balasaheb Gaikwad"
+        },
+        "occupation": {
+          "mr": "Farming",
+          "en": "शेती"
+        },
+        "location": {
+          "mr": "बुकी",
+          "en": "Buki"
+        }
       }
     ]
   },
