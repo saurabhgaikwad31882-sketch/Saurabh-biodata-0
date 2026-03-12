@@ -514,21 +514,23 @@ window.addFamilyMember=function(listId,fields){
 function getImageUrl(filename) {
   const cfg = getGithubConfig();
   if (!cfg.owner || !cfg.repo) return filename;
-  // Legacy base64 or external URL — return as-is
   if (!filename || filename.startsWith('data:') || filename.startsWith('http')) return filename;
-  // Use GitHub Pages URL — faster, no CDN delay, cached properly
-  // Format: https://username.github.io/repo/photos/filename.jpg
-  return `https://${cfg.owner}.github.io/${cfg.repo}/photos/${filename}`;
+  const branch = cfg.branch || 'main';
+  // Use jsDelivr CDN — fastest, no delay, works immediately after upload
+  return `https://cdn.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${branch}/photos/${filename}`;
 }
 
 function renderAdminGallery(){
   const e=document.getElementById('admin-gallery-grid');if(!e)return;
   if(!appData.gallery||!appData.gallery.length){e.innerHTML='<p style="color:var(--text-light);font-size:0.85rem">अजून फोटो नाही</p>';return;}
-  e.innerHTML=appData.gallery.map((src,i)=>`
-    <div class="admin-gallery-item">
-      <img src="${getImageUrl(src)}" alt="" onerror="this.style.opacity=0.3"/>
+  e.innerHTML=appData.gallery.map((src,i)=>{
+    const url = getImageUrl(src);
+    return `<div class="admin-gallery-item">
+      <img src="${url}" alt="" onerror="this.src='';this.style.background='#fee2e2';this.title='Failed: '+decodeURIComponent('${encodeURIComponent(url)}')"/>
+      <div style="font-size:0.65rem;color:#666;word-break:break-all;padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${url}">${url.split('/').pop()}</div>
       <button class="ag-remove" onclick="removeGalleryPhoto(${i})">${IC.x}</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 window.removeGalleryPhoto=async function(i){
