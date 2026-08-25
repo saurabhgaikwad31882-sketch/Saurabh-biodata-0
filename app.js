@@ -26,10 +26,10 @@ const ADMIN_PWD  = 'ganesh@admin';
 const CACHE_KEY = 'parichay_data_cache';
 
 const DEFAULT_DATA = {
-  name:    { mr: 'श्री. राहुल विनायक देशपांडे', en: 'Mr. Rahul Vinayak Deshpande' },
+  name:    { mr: 'श्री. सचिन सतीश नाईकवाडे', en: 'Mr. Rahul Vinayak Deshpande' },
   personal: {
     dob:        { mr: '15 जून 1996',           en: '15 June 1996' },
-    height:     { mr: '5 फूट 8 इंच (172 cm)',  en: '5 ft 8 in (172 cm)' },
+    height:     { mr: '5 फूट 9 इंच (172 cm)',  en: '5 ft 8 in (172 cm)' },
     colour:     { mr: 'गोरा (Fair)',            en: 'Fair' },
     jatDharma:  { mr: 'मराठा / Hindu',          en: 'Maratha / Hindu' },
     kuldaivat:  { mr: 'श्री. भवानी माता',       en: 'Shri Bhavani Mata' },
@@ -54,7 +54,7 @@ const DEFAULT_DATA = {
   },
   family: {
     father: {
-      name:       { mr: 'श्री. विनायक रामचंद्र देशपांडे', en: 'Shri. Vinayak Ramchandra Deshpande' },
+      name:       { mr: 'श्री. सतीश नाईकवाडे', en: 'Shri. Vinayak Ramchandra Deshpande' },
       occupation: { mr: 'शेती व्यवसाय', en: 'Farming' }
     },
     mother: {
